@@ -2,6 +2,10 @@
 
 node spawn but return promise.
 
+[![Build Status](https://travis-ci.org/LoveKino/spawnp.svg)](https://travis-ci.org/LoveKino/spawnp.svg)
+
+[![Coverage Status](https://coveralls.io/repos/github/LoveKino/spawnp/badge.svg?branch=master)](https://coveralls.io/github/LoveKino/spawnp?branch=master)
+
 ## install
 
 `npm i spawnp --save`
@@ -24,10 +28,10 @@ spawnp('echo', ['123']).then(() => {
 
 - command
 
-Just like spawn's command, but support arg in command, like `node -v`
+Just like spawn's command, but support arg in command, like `echo 123`
 
 ```js
-spawnp('echo 123', ['456']);
+spawnp('echo 123', ['456']); // 123 456\n
 ```
 
 - args
