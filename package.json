@@ -1,0 +1,29 @@
+{
+  "name": "spawnp",
+  "version": "0.0.1",
+  "description": "node spawn return promise",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/**/*.js",
+    "cover": "istanbul cover _mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LoveKino/spawnp.git"
+  },
+  "keywords": [
+    "spawn",
+    "promise",
+    "node"
+  ],
+  "author": "ddchen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LoveKino/spawnp/issues"
+  },
+  "homepage": "https://github.com/LoveKino/spawnp#readme",
+  "devDependencies": {
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.0"
+  }
+}
