@@ -4,8 +4,30 @@ let {
     spawn
 } = require('child_process');
 
-module.exports = (command, args, options, extra = {}) => {
+let {
+    isString, likeArray
+} = require('basetype');
+
+let spawnp = (command, args, options, extra = {}) => {
     args = args || [];
+
+    if (isString(command)) {
+        return spawnCmd(command, args, options, extra);
+    } else if (likeArray(command)) {
+        if (!command.length) return Promise.resolve([]);
+        let cmd = command.shift();
+        // run commands one by one
+        return spawnCmd(cmd, args, options, extra).then((cmdRet) => {
+            return spawnp(command, args, options, extra).then((rests) => {
+                return [cmdRet].concat(rests);
+            });
+        });
+    } else {
+        return Promise.reject(new Error(`unexpected command ${command}`));
+    }
+};
+
+let spawnCmd = (command, args, options, extra) => {
     let parts = command.trim().split(' ');
     command = parts.shift();
     // merge args from command
@@ -55,3 +77,5 @@ module.exports = (command, args, options, extra = {}) => {
         });
     });
 };
+
+module.exports = spawnp;

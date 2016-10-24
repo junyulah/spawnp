@@ -1,6 +1,6 @@
 {
   "name": "spawnp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "node spawn return promise",
   "main": "index.js",
   "scripts": {
@@ -27,5 +27,8 @@
     "istanbul": "^0.4.5",
     "mocha": "^3.1.0",
     "mocha-lcov-reporter": "^1.2.0"
+  },
+  "dependencies": {
+    "basetype": "^0.1.2"
   }
 }

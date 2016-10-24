@@ -61,4 +61,34 @@ describe('index', () => {
             assert.equal(stdouts.join(''), '123 456\n');
         });
     });
+
+    it('spawn lists', () => {
+        return spawnp([
+            'echo 123',
+            'echo 456'
+        ], null, null, {
+            stdout: true
+        }).then(rets => {
+            assert.deepEqual(rets.map(ret => ret.stdouts.join('')), ['123\n', '456\n']);
+        });
+    });
+
+    it('spawn error lists', (done) => {
+        spawnp([
+            'echo123',
+            'echo 456'
+        ], null, null, {
+            stdout: true
+        }).catch(err => {
+            assert.equal(err.toString().indexOf('ENOENT') !== -1, true);
+            done();
+        });
+    });
+
+    it('spawnp unexpected type', (done) => {
+        spawnp(123).catch(err => {
+            assert.equal(err.toString().indexOf('unexpected command') !== -1, true);
+            done();
+        });
+    });
 });
