@@ -18,6 +18,7 @@ describe('index', () => {
     it('error code', (done) => {
         spawnp('ls', ['ooooooooooooooooooooo']).catch(err => {
             assert.equal(err.type, 'error_exist');
+            assert.equal(err.command, 'ls');
             done();
         });
     });

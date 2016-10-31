@@ -63,6 +63,8 @@ let spawnCmd = (command, args, options, extra) => {
         child.on('close', (code) => {
             if (code !== 0) {
                 let err = new Error(`child process exited with code ${code}`);
+                err.command = command;
+                err.commandArgs = args;
                 err.type = 'error_exist';
                 err.code = code;
                 err.stderrs = stderrs;
