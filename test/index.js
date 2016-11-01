@@ -133,6 +133,20 @@ describe('index', () => {
         });
     });
 
+    it('pipe single', () => {
+        return spawnp.exec(spawnp.pipeLine('echo 123'), [], {}, {
+            stdout: true
+        }).then((ret) => {
+            assert.equal(ret.trim(), '123');
+        });
+    });
+
+    it('pipe empty', () => {
+        return spawnp.exec(spawnp.pipeLine(), [], {}, {
+            stdout: true
+        });
+    });
+
     it('pipe error', (done) => {
         spawnp(spawnp.pipeLine(['ddskjfhsk', 'head -1']), [], {}, {
             stdout: true

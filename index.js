@@ -47,9 +47,12 @@ let spawnPipeLine = (command, args, options, extra) => {
             resolveChild(child, extra, command, args).catch(reject);
             return child;
         }, null);
-        if (!lastChild) return Promise.resolve();
+        if (!lastChild) resolve({
+            stdouts: [],
+            stderrs: []
+        });
 
-        return resolveChild(lastChild, extra, command, args).then(resolve).catch(reject);
+        resolveChild(lastChild, extra, command, args).then(resolve).catch(reject);
     });
 };
 
@@ -147,7 +150,7 @@ spawnp.pass = (command, args, options, extra = {}) => {
     });
 };
 
-spawnp.pipeLine = (commands) => {
+spawnp.pipeLine = (commands = []) => {
     if (isString(commands))
         commands = [commands];
     commands = commands.slice(0);
