@@ -5,40 +5,79 @@ let {
 } = require('child_process');
 
 let {
-    map
+    map, reduce
 } = require('bolzano');
 
 let {
     isString, likeArray
 } = require('basetype');
 
+// TODO support tree. ['a', ['b']]
 let spawnp = (command, args, options, extra = {}) => {
     args = args || [];
 
     if (isString(command)) {
         return spawnCmd(command, args, options, extra);
     } else if (likeArray(command)) {
-        if (!command.length) return Promise.resolve([]);
-        let cmd = command.shift();
-        // run commands one by one
-        return spawnCmd(cmd, args, options, extra).then((cmdRet) => {
-            return spawnp(command, args, options, extra).then((rests) => {
-                return [cmdRet].concat(rests);
+        if (command.type === 'pipe') {
+            return spawnPipeLine(command, args, options, extra);
+        } else {
+            if (!command.length) return Promise.resolve([]);
+            let cmd = command.shift();
+            // run commands one by one
+            return spawnCmd(cmd, args, options, extra).then((cmdRet) => {
+                return spawnp(command, args, options, extra).then((rests) => {
+                    return [cmdRet].concat(rests);
+                });
             });
-        });
+        }
     } else {
         return Promise.reject(new Error(`unexpected command ${command}`));
     }
 };
 
-let spawnCmd = (command, args, options, extra) => {
-    let parts = command.trim().split(' ');
-    command = parts.shift();
+let spawnPipeLine = (command, args, options, extra) => {
+    return new Promise((resolve, reject) => {
+        let lastChild = reduce(command, (prev, item) => {
+            let child = spawnChild(item, args, options);
+            if (prev) {
+                // pipe stdout
+                prev.stdout.pipe(child.stdin);
+            }
+
+            resolveChild(child, extra, command, args).catch(reject);
+            return child;
+        }, null);
+        if (!lastChild) return Promise.resolve();
+
+        return resolveChild(lastChild, extra, command, args).then(resolve).catch(reject);
+    });
+};
+
+let spawnCmd = (commandStr, args, options, extra) => {
+    return resolveChild(spawnChild(commandStr, args, options), extra, commandStr, args);
+};
+
+let spawnChild = (commandStr, args, options) => {
+    let command = parseCommand(commandStr);
+    args = parseArgs(commandStr, args);
+
+    return spawn(command, args, options || undefined);
+};
+
+let parseArgs = (commandStr, args) => {
+    let parts = commandStr.trim().split(' ');
+    parts.shift();
     // merge args from command
-    args = parts.concat(args);
+    return parts.concat(args);
+};
 
-    let child = spawn(command, args, options || undefined);
+let parseCommand = (commandStr) => {
+    let parts = commandStr.trim().split(' ');
+    return parts[0];
+};
 
+let resolveChild = (child, extra, command, args) => {
     if (extra.onChild) {
         extra.onChild(child);
     }
@@ -105,6 +144,14 @@ spawnp.pass = (command, args, options, extra = {}) => {
             throw err;
         }
     });
+};
+
+spawnp.pipeLine = (commands) => {
+    if (isString(commands))
+        commands = [commands];
+    commands = commands.slice(0);
+    commands.type = 'pipe';
+    return commands;
 };
 
 module.exports = spawnp;

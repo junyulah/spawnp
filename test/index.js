@@ -122,4 +122,23 @@ describe('index', () => {
             done();
         });
     });
+
+    it('pipe', () => {
+        return spawnp(spawnp.pipeLine(['echo 123\n456', 'head -1']), [], {}, {
+            stdout: true
+        }).then(({
+            stdouts
+        }) => {
+            assert.equal(stdouts.join('').trim(), '123');
+        });
+    });
+
+    it('pipe error', (done) => {
+        spawnp(spawnp.pipeLine(['ddskjfhsk', 'head -1']), [], {}, {
+            stdout: true
+        }).catch((err) => {
+            assert.equal(err.toString().indexOf('spawn ddskjfhsk ENOENT') !== -1, true);
+            done();
+        });
+    });
 });
