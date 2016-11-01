@@ -92,4 +92,16 @@ describe('index', () => {
             done();
         });
     });
+
+    it('exec', () => {
+        return spawnp.exec('echo 123').then((ret) => {
+            assert.equal(ret, '123\n');
+        });
+    });
+
+    it('exec', () => {
+        return spawnp.exec(['echo 123', 'echo 456']).then((ret) => {
+            assert.deepEqual(ret, ['123\n', '456\n']);
+        });
+    });
 });

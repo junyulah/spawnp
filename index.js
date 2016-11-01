@@ -5,6 +5,10 @@ let {
 } = require('child_process');
 
 let {
+    map
+} = require('bolzano');
+
+let {
     isString, likeArray
 } = require('basetype');
 
@@ -77,6 +81,17 @@ let spawnCmd = (command, args, options, extra) => {
                 });
             }
         });
+    });
+};
+
+spawnp.exec = (command, args, options, extra = {}) => {
+    extra.stdout = true;
+    return spawnp(command, args, options, extra).then((ret) => {
+        if (likeArray(ret)) {
+            return map(ret, (item) => item.stdouts.join(''));
+        } else {
+            return ret.stdouts.join('');
+        }
     });
 };
 
