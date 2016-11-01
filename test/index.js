@@ -104,4 +104,22 @@ describe('index', () => {
             assert.deepEqual(ret, ['123\n', '456\n']);
         });
     });
+
+    it('pass', () => {
+        return spawnp.pass(['echo 123']).then((ret) => {
+            assert.equal(ret, true);
+        });
+    });
+
+    it('pass2', () => {
+        return spawnp.pass('ls euiuwurheieiuierjj').then((ret) => {
+            assert.equal(ret, false);
+        });
+    });
+
+    it('pass3', (done) => {
+        spawnp.pass(123).catch(() => {
+            done();
+        });
+    });
 });

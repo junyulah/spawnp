@@ -95,4 +95,16 @@ spawnp.exec = (command, args, options, extra = {}) => {
     });
 };
 
+spawnp.pass = (command, args, options, extra = {}) => {
+    return spawnp(command, args, options, extra).then(() => {
+        return true;
+    }).catch((err) => {
+        if (err.code) {
+            return false;
+        } else {
+            throw err;
+        }
+    });
+};
+
 module.exports = spawnp;
