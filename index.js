@@ -12,7 +12,6 @@ let {
     isString, likeArray
 } = require('basetype');
 
-// TODO support tree. ['a', ['b']]
 let spawnp = (command, args, options, extra = {}) => {
     args = args || [];
 
@@ -25,7 +24,7 @@ let spawnp = (command, args, options, extra = {}) => {
             if (!command.length) return Promise.resolve([]);
             let cmd = command.shift();
             // run commands one by one
-            return spawnCmd(cmd, args, options, extra).then((cmdRet) => {
+            return spawnp(cmd, args, options, extra).then((cmdRet) => {
                 return spawnp(command, args, options, extra).then((rests) => {
                     return [cmdRet].concat(rests);
                 });
@@ -125,13 +124,15 @@ let resolveChild = (child, extra, command, args) => {
 
 spawnp.exec = (command, args, options, extra = {}) => {
     extra.stdout = true;
-    return spawnp(command, args, options, extra).then((ret) => {
-        if (likeArray(ret)) {
-            return map(ret, (item) => item.stdouts.join(''));
-        } else {
-            return ret.stdouts.join('');
-        }
-    });
+    return spawnp(command, args, options, extra).then(joinItem);
+};
+
+let joinItem = (ret) => {
+    if (likeArray(ret)) {
+        return map(ret, joinItem);
+    } else {
+        return ret.stdouts.join('');
+    }
 };
 
 spawnp.pass = (command, args, options, extra = {}) => {

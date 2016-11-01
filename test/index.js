@@ -141,4 +141,20 @@ describe('index', () => {
             done();
         });
     });
+
+    it('spawn lists of lists', () => {
+        return spawnp.exec([
+            'echo 123', ['echo 456']
+        ]).then(rets => {
+            assert.deepEqual(rets, ['123\n', ['456\n']]);
+        });
+    });
+
+    it('spawn lists of lists2', () => {
+        return spawnp.exec([
+            'echo 123', spawnp.pipeLine(['echo 456\n678', 'head -1'])
+        ]).then(rets => {
+            assert.deepEqual(rets, ['123\n', '456\n']);
+        });
+    });
 });
