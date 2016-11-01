@@ -46,13 +46,13 @@ let spawnCmd = (command, args, options, extra) => {
     let stdouts = [];
     let stderrs = [];
 
-    if (extra.stdout) {
+    if (extra.stdout && child.stdout) {
         child.stdout.on('data', (chunk) => {
             stdouts.push(chunk);
         });
     }
 
-    if (extra.stderr) {
+    if (extra.stderr && child.stderr) {
         child.stderr.on('data', (chunk) => {
             stderrs.push(chunk);
         });
