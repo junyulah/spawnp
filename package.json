@@ -1,6 +1,6 @@
 {
   "name": "spawnp",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "node spawn return promise",
   "main": "index.js",
   "scripts": {

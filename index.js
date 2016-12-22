@@ -1,7 +1,7 @@
 'use strict';
 
 let {
-    spawn
+    spawn, exec
 } = require('child_process');
 
 let {
@@ -9,7 +9,7 @@ let {
 } = require('bolzano');
 
 let {
-    isString, likeArray
+    isString, isArray
 } = require('basetype');
 
 let spawnp = (command, args, options, extra = {}) => {
@@ -17,7 +17,7 @@ let spawnp = (command, args, options, extra = {}) => {
 
     if (isString(command)) {
         return spawnCmd(command, args, options, extra);
-    } else if (likeArray(command)) {
+    } else if (isArray(command)) {
         if (command.type === 'pipe') {
             return spawnPipeLine(command, args, options, extra);
         } else {
@@ -84,20 +84,9 @@ let resolveChild = (child, extra, command, args) => {
         extra.onChild(child);
     }
 
-    let stdouts = [];
-    let stderrs = [];
-
-    if (extra.stdout && child.stdout) {
-        child.stdout.on('data', (chunk) => {
-            stdouts.push(chunk);
-        });
-    }
-
-    if (extra.stderr && child.stderr) {
-        child.stderr.on('data', (chunk) => {
-            stderrs.push(chunk);
-        });
-    }
+    let {
+        stdouts, stderrs
+    } = onOutput(child, extra);
 
     return new Promise((resolve, reject) => {
         child.on('error', (err) => {
@@ -105,6 +94,7 @@ let resolveChild = (child, extra, command, args) => {
             err.stderrs = stderrs;
             reject(err);
         });
+
         child.on('close', (code) => {
             if (code !== 0) {
                 let err = new Error(`child process exited with code ${code}`);
@@ -125,13 +115,60 @@ let resolveChild = (child, extra, command, args) => {
     });
 };
 
-spawnp.exec = (command, args, options, extra = {}) => {
-    extra.stdout = true;
-    return spawnp(command, args, options, extra).then(joinItem);
+let onOutput = (child, extra) => {
+    let stdouts = [];
+    let stderrs = [];
+
+    if (extra.stdout && child.stdout) {
+        child.stdout.on('data', (chunk) => {
+            stdouts.push(chunk);
+        });
+    }
+
+    if (extra.stderr && child.stderr) {
+        child.stderr.on('data', (chunk) => {
+            stderrs.push(chunk);
+        });
+    }
+
+    return {
+        stdouts,
+        stderrs
+    };
+};
+
+spawnp.exec = (command, options) => {
+    if (isArray(command)) {
+        if (!command.length) return Promise.resolve([]);
+        return spawnp.exec(command[0], options).then((ret) => {
+            return spawnp.exec(command.slice(1)).then((rest) => {
+                return [ret].concat(rest);
+            });
+        });
+    } else {
+        return execCmd(command, options);
+    }
+};
+
+let execCmd = (cmd, options = {}) => {
+    return new Promise((resolve, reject) => {
+        let child = exec(cmd, options, (err, stdout) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(stdout);
+            }
+        });
+
+        if (options.stdio === 'inherit') {
+            child.stdout.pipe(process.stdout);
+            child.stderr.pipe(process.stderr);
+        }
+    });
 };
 
 let joinItem = (ret) => {
-    if (likeArray(ret)) {
+    if (isArray(ret)) {
         return map(ret, joinItem);
     } else {
         return ret.stdouts.join('');

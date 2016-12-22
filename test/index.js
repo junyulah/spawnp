@@ -53,6 +53,13 @@ describe('index', () => {
         });
     });
 
+    it('exec:stderr', (done) => {
+        spawnp.exec('ls ooooooooo').catch(() => {
+            done();
+        });
+    });
+
+
     it('expand command', () => {
         return spawnp('echo 123', ['456'], null, {
             stdout: true
@@ -133,14 +140,6 @@ describe('index', () => {
         });
     });
 
-    it('pipe single', () => {
-        return spawnp.exec(spawnp.pipeLine('echo 123'), [], {}, {
-            stdout: true
-        }).then((ret) => {
-            assert.equal(ret.trim(), '123');
-        });
-    });
-
     it('pipe empty', () => {
         return spawnp.exec(spawnp.pipeLine(), [], {}, {
             stdout: true
@@ -166,9 +165,15 @@ describe('index', () => {
 
     it('spawn lists of lists2', () => {
         return spawnp.exec([
-            'echo 123', spawnp.pipeLine(['echo 456\n678', 'head -1'])
+            'echo 123', 'echo 456\n678  | head -1'
         ]).then(rets => {
             assert.deepEqual(rets, ['123\n', '456\n']);
+        });
+    });
+
+    it('exec real time stdout', () => {
+        spawnp.exec('echo 123', {
+            stdio: 'inherit'
         });
     });
 });
